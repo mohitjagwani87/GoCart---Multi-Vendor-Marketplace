@@ -137,7 +137,7 @@ export default function AboutInteractive() {
     const sectionRef = useRef(null)
     const containerRef = useRef(null)
     const [activeIndex, setActiveIndex] = useState(0)
-    const [isScrollLocked, setIsScrollLocked] = useState(false)
+    const [cycleDone, setCycleDone] = useState(false)
     const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end end'] })
 
     useMotionValueEvent(scrollYProgress, 'change', (latest) => {
@@ -145,28 +145,38 @@ export default function AboutInteractive() {
         setActiveIndex((current) => (current === nextIndex ? current : nextIndex))
     })
 
-    // Handle wheel and touch scroll to lock page and step through content
+    // Handle wheel and touch scroll to step through content (one cycle only)
     React.useEffect(() => {
         const handleWheel = (e) => {
             if (!containerRef.current?.contains(e.target)) return
 
-            const isAtBottom = activeIndex === steps.length - 1
-            if (isAtBottom) return // Allow normal scroll when done
+            // If cycle complete, allow normal scroll
+            if (cycleDone) return
 
+            const isAtEnd = activeIndex === steps.length - 1
+            if (isAtEnd) {
+                // Mark cycle as complete, allow scroll to continue
+                setCycleDone(true)
+                return
+            }
+
+            // Lock scroll and advance step
             e.preventDefault()
             const direction = e.deltaY > 0 ? 1 : -1
             setActiveIndex((current) => Math.max(0, Math.min(steps.length - 1, current + direction)))
-            setIsScrollLocked(true)
         }
 
         const handleTouchMove = (e) => {
             if (!containerRef.current?.contains(e.target)) return
+            if (cycleDone) return
 
-            const isAtBottom = activeIndex === steps.length - 1
-            if (isAtBottom) return
+            const isAtEnd = activeIndex === steps.length - 1
+            if (isAtEnd) {
+                setCycleDone(true)
+                return
+            }
 
             e.preventDefault()
-            setIsScrollLocked(true)
         }
 
         const container = containerRef.current
@@ -179,7 +189,7 @@ export default function AboutInteractive() {
                 container.removeEventListener('touchmove', handleTouchMove)
             }
         }
-    }, [activeIndex])
+    }, [activeIndex, cycleDone])
 
     const activeStep = useMemo(() => steps[activeIndex], [activeIndex])
 
