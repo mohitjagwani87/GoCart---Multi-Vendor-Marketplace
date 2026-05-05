@@ -135,7 +135,9 @@ function StepCard({ step, active, index, total }) {
 
 export default function AboutInteractive() {
     const sectionRef = useRef(null)
+    const containerRef = useRef(null)
     const [activeIndex, setActiveIndex] = useState(0)
+    const [isScrollLocked, setIsScrollLocked] = useState(false)
     const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end end'] })
 
     useMotionValueEvent(scrollYProgress, 'change', (latest) => {
@@ -143,13 +145,49 @@ export default function AboutInteractive() {
         setActiveIndex((current) => (current === nextIndex ? current : nextIndex))
     })
 
+    // Handle wheel and touch scroll to lock page and step through content
+    React.useEffect(() => {
+        const handleWheel = (e) => {
+            if (!containerRef.current?.contains(e.target)) return
+
+            const isAtBottom = activeIndex === steps.length - 1
+            if (isAtBottom) return // Allow normal scroll when done
+
+            e.preventDefault()
+            const direction = e.deltaY > 0 ? 1 : -1
+            setActiveIndex((current) => Math.max(0, Math.min(steps.length - 1, current + direction)))
+            setIsScrollLocked(true)
+        }
+
+        const handleTouchMove = (e) => {
+            if (!containerRef.current?.contains(e.target)) return
+
+            const isAtBottom = activeIndex === steps.length - 1
+            if (isAtBottom) return
+
+            e.preventDefault()
+            setIsScrollLocked(true)
+        }
+
+        const container = containerRef.current
+        if (container) {
+            container.addEventListener('wheel', handleWheel, { passive: false })
+            container.addEventListener('touchmove', handleTouchMove, { passive: false })
+
+            return () => {
+                container.removeEventListener('wheel', handleWheel)
+                container.removeEventListener('touchmove', handleTouchMove)
+            }
+        }
+    }, [activeIndex])
+
     const activeStep = useMemo(() => steps[activeIndex], [activeIndex])
 
     return (
         <section ref={sectionRef} className="relative isolate overflow-hidden bg-slate-950 text-white" style={{ minHeight: `${Math.max(240, steps.length * 70)}vh` }}>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,197,94,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.14),transparent_28%)]" />
 
-            <div className="sticky top-0 flex min-h-screen items-center">
+            <div ref={containerRef} className="sticky top-0 flex min-h-screen items-center">
                 <div className="mx-auto grid w-full max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:px-8">
                     <div className="space-y-6">
                         <span className="inline-flex w-fit items-center rounded-full border border-white/15 bg-white/8 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-emerald-200 backdrop-blur">
