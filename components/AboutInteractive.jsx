@@ -138,6 +138,7 @@ export default function AboutInteractive() {
     const containerRef = useRef(null)
     const [activeIndex, setActiveIndex] = useState(0)
     const [cycleDone, setCycleDone] = useState(false)
+    const [lastDirection, setLastDirection] = useState(1)
     const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end end'] })
 
     useMotionValueEvent(scrollYProgress, 'change', (latest) => {
@@ -150,28 +151,39 @@ export default function AboutInteractive() {
         const handleWheel = (e) => {
             if (!containerRef.current?.contains(e.target)) return
 
-            // If cycle complete, allow normal scroll
-            if (cycleDone) return
+            const direction = e.deltaY > 0 ? 1 : -1
 
-            const isAtEnd = activeIndex === steps.length - 1
-            if (isAtEnd) {
-                // Mark cycle as complete, allow scroll to continue
+            // When the user changes direction, start a fresh cycle for the new direction.
+            if (cycleDone && direction !== lastDirection) {
+                setCycleDone(false)
+            }
+
+            // If this cycle already completed and the user keeps going the same way, allow normal scroll.
+            if (cycleDone && direction === lastDirection) return
+
+            const isAtEnd = direction > 0 && activeIndex === steps.length - 1
+            const isAtStart = direction < 0 && activeIndex === 0
+            if (isAtEnd || isAtStart) {
+                // Mark cycle as complete for this direction, allow scroll to continue.
                 setCycleDone(true)
+                setLastDirection(direction)
                 return
             }
 
             // Lock scroll and advance step
             e.preventDefault()
-            const direction = e.deltaY > 0 ? 1 : -1
+            setLastDirection(direction)
             setActiveIndex((current) => Math.max(0, Math.min(steps.length - 1, current + direction)))
         }
 
         const handleTouchMove = (e) => {
             if (!containerRef.current?.contains(e.target)) return
+
             if (cycleDone) return
 
-            const isAtEnd = activeIndex === steps.length - 1
-            if (isAtEnd) {
+            const isAtEnd = lastDirection > 0 && activeIndex === steps.length - 1
+            const isAtStart = lastDirection < 0 && activeIndex === 0
+            if (isAtEnd || isAtStart) {
                 setCycleDone(true)
                 return
             }
@@ -189,7 +201,7 @@ export default function AboutInteractive() {
                 container.removeEventListener('touchmove', handleTouchMove)
             }
         }
-    }, [activeIndex, cycleDone])
+    }, [activeIndex, cycleDone, lastDirection])
 
     const activeStep = useMemo(() => steps[activeIndex], [activeIndex])
 
