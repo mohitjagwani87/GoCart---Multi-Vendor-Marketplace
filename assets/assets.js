@@ -124,7 +124,7 @@ export const productDummyData = [
     },
     {
         id: "prod_5",
-        name: "Smart watch black",
+        name: "Wireless speaker",
         description: "Smart watch with a sleek design. It's perfect for any room. It's made of high-quality materials and comes with a lifetime warranty.",
         mrp: 49,
         price: 29,
@@ -132,7 +132,7 @@ export const productDummyData = [
         storeId: "seller_1",
         inStock: true,
         store: dummyStoreData,
-        category: "Watch",
+        category: "Speakers",
         rating: [...dummyRatingsData,...dummyRatingsData],
         createdAt: 'Sat Jul 25 2025 14:51:25 GMT+0530 (India Standard Time)',
         updatedAt: 'Sat Jul 25 2025 14:51:25 GMT+0530 (India Standard Time)',

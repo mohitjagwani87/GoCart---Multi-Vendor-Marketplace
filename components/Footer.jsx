@@ -10,10 +10,10 @@ const Footer = () => {
         {
             title: "PRODUCTS",
             links: [
-                { text: "Earphones", path: '/', icon: null },
-                { text: "Headphones", path: '/', icon: null },
-                { text: "Smartphones", path: '/', icon: null },
-                { text: "Laptops", path: '/', icon: null },
+                { text: "Smartwatch", path: '/shop?category=Watch', icon: null },
+                { text: "Speaker", path: '/shop?category=Speakers', icon: null },
+                { text: "Headphones", path: '/shop?category=Headphones', icon: null },
+                { text: "Gaming Mouse", path: '/shop?category=Mouse', icon: null },
             ]
         },
         {
