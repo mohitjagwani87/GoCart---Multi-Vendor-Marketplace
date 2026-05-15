@@ -1,5 +1,8 @@
 # GoCart
 
+Redeploy trigger: small README update to force Vercel rebuild.
+# GoCart
+
 GoCart is a multi-vendor e-commerce platform where customers can shop, store owners can manage products and orders, and admins can manage the full marketplace.
 
 ## Project Name
